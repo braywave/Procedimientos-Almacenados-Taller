@@ -79,3 +79,70 @@ INSERT INTO Calificaciones (id_inscripcion, nota, fecha_evaluacion) VALUES
 (8, 78.9, '2025-03-08'),
 (9, 88.6, '2025-03-09'),
 (10, 91.2, '2025-03-10');
+
+--Procesos almacenados
+
+-- 1. Procedimiento para inscribir un estudiante en un curso
+DELIMITER //
+CREATE PROCEDURE InscribirEstudiante(
+    IN p_id_estudiante INT,
+    IN p_id_curso INT,
+    IN p_fecha_inscripcion DATE
+)
+BEGIN
+    INSERT INTO Inscripciones (id_estudiante, id_curso, fecha_inscripcion)
+    VALUES (p_id_estudiante, p_id_curso, p_fecha_inscripcion);
+END //
+DELIMITER ;
+
+-- 2. Procedimiento para calcular el promedio de notas de un estudiante
+DELIMITER //
+CREATE PROCEDURE CalcularPromedioNotas(
+    IN p_id_estudiante INT,
+    OUT p_promedio DECIMAL(5,2)
+)
+BEGIN
+    SELECT AVG(nota) INTO p_promedio
+    FROM Calificaciones c
+    JOIN Inscripciones i ON c.id_inscripcion = i.id_inscripcion
+    WHERE i.id_estudiante = p_id_estudiante;
+END //
+DELIMITER ;
+
+-- 3. Procedimiento para obtener la lista de cursos en los que está inscrito un estudiante
+DELIMITER //
+CREATE PROCEDURE ObtenerCursosEstudiante(
+    IN p_id_estudiante INT
+)
+BEGIN
+    SELECT c.id_curso, c.nombre, c.descripcion
+    FROM Cursos c
+    JOIN Inscripciones i ON c.id_curso = i.id_curso
+    WHERE i.id_estudiante = p_id_estudiante;
+END //
+DELIMITER ;
+
+-- 4. Procedimiento para actualizar la calificación de un estudiante en un curso
+DELIMITER //
+CREATE PROCEDURE ActualizarCalificacion(
+    IN p_id_inscripcion INT,
+    IN p_nota DECIMAL(5,2),
+    IN p_fecha_evaluacion DATE
+)
+BEGIN
+    UPDATE Calificaciones
+    SET nota = p_nota, fecha_evaluacion = p_fecha_evaluacion
+    WHERE id_inscripcion = p_id_inscripcion;
+END //
+DELIMITER ;
+
+-- 5. Procedimiento para eliminar la inscripción de un estudiante en un curso
+DELIMITER //
+CREATE PROCEDURE EliminarInscripcion(
+    IN p_id_inscripcion INT
+)
+BEGIN
+    DELETE FROM Inscripciones
+    WHERE id_inscripcion = p_id_inscripcion;
+END //
+DELIMITER ;
